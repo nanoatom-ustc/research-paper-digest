@@ -33,14 +33,21 @@ class PaperDailyDigest:
         }
         self.fetchers = [factories[source]() for source in Config.SEARCH_SOURCES]
         self.email_sender = EmailSender()
+        self.failed_sources = []
 
     def fetch_papers(self, days_back):
         papers = []
+        self.failed_sources = []
         for fetcher in self.fetchers:
             logger.info("正在查询数据源: %s", fetcher.source_name)
-            papers.extend(
-                fetcher.fetch_recent_papers(days_back=days_back, max_results=Config.MAX_RESULTS)
-            )
+            try:
+                source_papers = fetcher.fetch_recent_papers(
+                    days_back=days_back, max_results=Config.MAX_RESULTS
+                )
+                papers.extend(source_papers)
+            except Exception:
+                self.failed_sources.append(fetcher.source_name)
+                logger.exception("Data source failed: %s", fetcher.source_name)
 
         # A DOI may appear in more than one source. Preserve the first result and
         # apply MAX_RESULTS to the combined digest, matching the old global limit.
@@ -62,13 +69,20 @@ class PaperDailyDigest:
             papers = self.fetch_papers(days_back)
             summaries = [generate_summary(paper) for paper in papers]
 
+            if self.failed_sources:
+                logger.error("Digest is incomplete; failed sources: %s", ", ".join(self.failed_sources))
             if papers:
                 logger.info("Found %s matching papers", len(papers))
-            else:
+            elif not self.failed_sources:
                 logger.info("No matching papers found; sending an empty digest notice")
 
-            if not self.email_sender.send_digest(papers, summaries):
+            # Keep the original two-argument call for successful fetches.
+            options = {"failed_sources": self.failed_sources} if self.failed_sources else {}
+            if not self.email_sender.send_digest(papers, summaries, **options):
                 logger.error("Email sending failed")
+                return False
+            if self.failed_sources:
+                logger.error("Warning digest sent, but task failed because source data is incomplete")
                 return False
             logger.info("Task completed; sent digest for %s papers", len(papers))
             return True

@@ -16,17 +16,18 @@ class EmailSender:
         self.password = Config.EMAIL_PASSWORD
         self.recipient = Config.RECIPIENT_EMAIL
 
-    def send_digest(self, papers: list, summaries: list):
+    def send_digest(self, papers: list, summaries: list, failed_sources=None):
         current_date = datetime.now().strftime("%Y-%m-%d")
         try:
             msg = MIMEMultipart("alternative")
-            msg["Subject"] = f"论文摘要 - {current_date}"
+            status = "【数据不完整】" if failed_sources else ""
+            msg["Subject"] = f"{status}论文摘要 - {current_date}"
             msg["From"] = self.sender
             msg["To"] = self.recipient
 
-            if papers:
-                text_content = self._build_text_content(papers, summaries)
-                html_content = self._build_html_content(papers, summaries)
+            if papers or failed_sources:
+                text_content = self._build_text_content(papers, summaries, failed_sources)
+                html_content = self._build_html_content(papers, summaries, failed_sources)
             else:
                 text_content = self._build_no_papers_text()
                 html_content = self._build_no_papers_html()
@@ -66,7 +67,15 @@ class EmailSender:
             f"关键词：{', '.join(Config.SEARCH_KEYWORDS)}",
         ])
 
-    def _build_text_content(self, papers, summaries):
+    @staticmethod
+    def _failure_notice(failed_sources, has_papers):
+        if not failed_sources:
+            return ""
+        status = "本次摘要不完整" if has_papers else "本次论文查询结果不可用或不完整"
+        return (f"警告：{status}。数据源查询失败：{', '.join(failed_sources)}。"
+                "仅包含成功获取的结果，无法确认是否有其他新论文。")
+
+    def _build_text_content(self, papers, summaries, failed_sources=None):
         content = [
             "论文每日摘要",
             f"生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
@@ -75,12 +84,17 @@ class EmailSender:
             "=" * 60,
             "",
         ]
+        notice = self._failure_notice(failed_sources, bool(papers))
+        if notice:
+            content.insert(0, notice)
         for index, (paper, summary) in enumerate(zip(papers, summaries), 1):
             content.extend([f"论文 #{index}: {paper['title']}", summary])
         return "\n".join(content)
 
-    def _build_html_content(self, papers, summaries):
+    def _build_html_content(self, papers, summaries, failed_sources=None):
         del summaries  # summaries are used by the plain-text alternative
+        notice = self._failure_notice(failed_sources, bool(papers))
+        warning = f'<p role="alert" style="color:#a40000">{html.escape(notice)}</p>' if notice else ""
         cards = []
         for index, paper in enumerate(papers, 1):
             authors = ", ".join(paper.get("authors", [])[:3])
@@ -110,6 +124,7 @@ class EmailSender:
             <h1>📚 论文每日摘要</h1>
             <p>{datetime.now().strftime('%Y年%m月%d日')} · {len(papers)} 篇 · {html.escape(self._source_names())}</p>
           </div>
+          {warning}
           {''.join(cards)}
         </body></html>
         """
