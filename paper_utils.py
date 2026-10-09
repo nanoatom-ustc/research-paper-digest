@@ -23,6 +23,8 @@ _KEYWORD_ALIASES = {
         "array of optical tweezers",
         "arrays of optical tweezers",
     ),
+    "neutral atom": ("neutral atom", "neutral atoms"),
+    "neutral atoms": ("neutral atom", "neutral atoms"),
     "pic": (
         "pic",
         "pics",

@@ -24,7 +24,7 @@ class Config:
 
     SEARCH_KEYWORDS = _csv_env(
         "SEARCH_KEYWORDS",
-        "tweezer array,PIC,microring,nanofiber,surface force",
+        "tweezer array,neutral atom,neutral atoms,PIC,microring,nanofiber,surface force",
     )
 
     SEARCH_SOURCES = [

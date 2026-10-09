@@ -29,7 +29,7 @@ jobs:
 
           FETCH_DAYS: ${{ vars.FETCH_DAYS || '2' }}
           MAX_RESULTS: ${{ vars.MAX_RESULTS || '20' }}
-          SEARCH_KEYWORDS: ${{ vars.SEARCH_KEYWORDS || 'tweezer array,PIC,microring,nanofiber,surface force' }}
+          SEARCH_KEYWORDS: ${{ vars.SEARCH_KEYWORDS || 'tweezer array,neutral atom,neutral atoms,PIC,microring,nanofiber,surface force' }}
           SEARCH_SOURCES: ${{ vars.SEARCH_SOURCES || 'arxiv,aps,nature,science,optica' }}
           SEARCH_CATEGORIES: ${{ vars.SEARCH_CATEGORIES || '' }}
           APS_JOURNALS: ${{ vars.APS_JOURNALS || '' }}

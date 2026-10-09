@@ -6,7 +6,7 @@
 
 ## 默认检索范围
 
-- 关注主题：tweezer array、PIC、microring、nanofiber、surface force。
+- 关注主题：tweezer array、neutral atom / neutral atoms、PIC、microring、nanofiber、surface force。
 - arXiv：可通过 `SEARCH_CATEGORIES` 限制分区。
 - APS：全部 APS 期刊，但默认排除 Physical Review B 和 Physical Review D。
 - Nature：仅配置的 Nature Portfolio 期刊。
@@ -31,7 +31,7 @@ API 只负责召回候选论文。程序会再次检查标题和摘要，只有�
 
 | Name | 默认值 | 说明 |
 |---|---|---|
-| `SEARCH_KEYWORDS` | `tweezer array,PIC,microring,nanofiber,surface force` | 英文逗号分隔，作用于所有数据源 |
+| `SEARCH_KEYWORDS` | `tweezer array,neutral atom,neutral atoms,PIC,microring,nanofiber,surface force` | 英文逗号分隔，作用于所有数据源 |
 | `SEARCH_SOURCES` | `arxiv,aps,nature,science,optica` | 启用的数据源 |
 | `SEARCH_CATEGORIES` | 空 | arXiv 分区代码，仅影响 arXiv |
 | `APS_JOURNALS` | 空 | APS 期刊允许列表 |
@@ -46,7 +46,7 @@ API 只负责召回候选论文。程序会再次检查标题和摘要，只有�
 示例：
 
 ```ini
-SEARCH_KEYWORDS=tweezer array,PIC,microring,nanofiber,surface force
+SEARCH_KEYWORDS=tweezer array,neutral atom,neutral atoms,PIC,microring,nanofiber,surface force
 SEARCH_SOURCES=arxiv,aps,nature,science,optica
 SEARCH_CATEGORIES=physics.atom-ph,quant-ph,physics.optics
 APS_EXCLUDE_JOURNALS=Physical Review B,Physical Review D,PRB,PRD

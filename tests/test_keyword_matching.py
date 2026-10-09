@@ -57,6 +57,8 @@ class KeywordMatchingTests(unittest.TestCase):
     def test_matches_configured_topic_variants(self):
         cases = [
             ("Scalable tweezer arrays for neutral atoms", "tweezer array"),
+            ("High-fidelity entangling gates and nonlocal circuits with neutral atoms", "neutral atom"),
+            ("A neutral-atom quantum processor", "neutral atoms"),
             ("A micro-ring resonator platform", "microring"),
             ("Atoms trapped near a nano-fiber", "nanofiber"),
             ("Measurements of surface forces near a dielectric", "surface force"),
