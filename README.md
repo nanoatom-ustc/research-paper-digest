@@ -13,7 +13,7 @@
 - Science：仅 Science 和 Science Advances。
 - Optica：由 `OPTICA_JOURNALS` 精确控制。
 
-API 只负责召回候选论文。程序会再次检查标题和摘要，只有完整主题词或受支持的常见写法实际出现时才发送，避免仅凭 `optical` 等部分词命中。匹配不区分大小写，并兼容连字符、空格和常见单复数；`tweezer array` 也会匹配 atom array(s)、atomic array(s)、neutral atom array(s)、array(s) of (optical) tweezers 等常见表达；`PIC` 也会匹配 photonic integrated circuit(s) 和 integrated photonic circuit(s)。
+API 只负责召回候选论文。程序会再次检查标题和摘要，只有完整主题词或受支持的常见写法实际出现时才发送，避免仅凭 `optical` 等部分词命中。匹配不区分大小写，并兼容连字符、空格和常见单复数；`tweezer array` 也会匹配 atom array(s)、atomic array(s)、neutral atom array(s)、Rydberg array(s)、array(s) of (optical) tweezers 等常见表达；`PIC` 也会匹配 photonic integrated circuit(s) 和 integrated photonic circuit(s)。
 
 ## GitHub 配置
 

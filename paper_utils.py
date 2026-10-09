@@ -16,6 +16,8 @@ _KEYWORD_ALIASES = {
         "atomic arrays",
         "neutral atom array",
         "neutral atom arrays",
+        "rydberg array",
+        "rydberg arrays",
         "array of tweezers",
         "arrays of tweezers",
         "array of optical tweezers",
@@ -54,6 +56,7 @@ def keyword_query_terms(keyword: str) -> List[str]:
             "tweezer array",
             "atom array",
             "neutral atom array",
+            "rydberg array",
             "array of optical tweezers",
         ]
     if normalised == "pic":

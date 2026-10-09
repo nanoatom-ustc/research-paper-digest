@@ -75,6 +75,8 @@ class KeywordMatchingTests(unittest.TestCase):
             "Coherent control of an array of optical tweezers",
             "Reconfigurable arrays of tweezers",
             "Scalable atom-tweezer arrays",
+            "Realization of a cavity-coupled Rydberg array",
+            "Quantum simulation with Rydberg arrays",
         ]
         for text in variants:
             with self.subTest(text=text):
@@ -87,6 +89,7 @@ class KeywordMatchingTests(unittest.TestCase):
                 "tweezer array",
                 "atom array",
                 "neutral atom array",
+                "rydberg array",
                 "array of optical tweezers",
             ],
         )
