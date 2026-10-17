@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 from email_sender import EmailSender
+from crossref_fetcher import CrossrefFetchError
 from main import PaperDailyDigest, main
 
 
@@ -70,6 +71,14 @@ class DigestFailureTests(unittest.TestCase):
         digest = self.make_digest([source("arXiv", [PAPER])])
         digest.email_sender.send_digest.return_value = False
         self.assertFalse(digest.run())
+
+    def test_partial_crossref_results_retained_and_reported(self):
+        fetcher = source("APS", error=CrossrefFetchError("one keyword failed", [PAPER]))
+        digest = self.make_digest([fetcher, source("Nature")])
+        self.assertFalse(digest.run())
+        args, kwargs = digest.email_sender.send_digest.call_args
+        self.assertEqual(args[0], [PAPER])
+        self.assertEqual(kwargs, {"failed_sources": ["APS"]})
 
     @patch("main.Config.validate")
     @patch.dict("os.environ", {"RUN_MODE": "ci"})

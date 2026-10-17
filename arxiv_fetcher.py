@@ -58,7 +58,9 @@ class _ArxivSession(requests.Session):
             return 0.0
 
     def get(self, url, **kwargs):
-        kwargs.setdefault("timeout", (10, 30))
+        # arxiv.py passes timeout=30 explicitly. Override it so slow API
+        # responses actually receive the larger read budget.
+        kwargs["timeout"] = (10, 90)
         waited = 0.0
         for attempt in range(self.MAX_ATTEMPTS):
             if self._last_request is not None:
@@ -100,7 +102,7 @@ class ArxivFetcher:
     source_name = "arXiv"
 
     def __init__(self):
-        self.client = arxiv.Client(delay_seconds=3.0, num_retries=0)
+        self.client = arxiv.Client(page_size=50, delay_seconds=3.0, num_retries=0)
         # Pinned arxiv==2.1.1 has no public session injection API. Keep its
         # parser/query/pagination unchanged and replace only the HTTP session.
         self.client._session.close()
@@ -113,6 +115,7 @@ class ArxivFetcher:
             query_terms = []
             for keyword in self.keywords:
                 query_terms.extend(keyword_aliases(keyword))
+            query_terms = list(dict.fromkeys(query_terms))
             keyword_query = " OR ".join([f'all:"{term}"' for term in query_terms])
             query = f"({keyword_query})"
 

@@ -8,6 +8,8 @@ from science_fetcher import ScienceFetcher
 
 
 class FakeResponse:
+    status_code = 200
+
     def __init__(self, items):
         self.items = items
 

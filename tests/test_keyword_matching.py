@@ -10,6 +10,8 @@ from paper_utils import (
 
 
 class FakeResponse:
+    status_code = 200
+
     def __init__(self, items):
         self.items = items
 

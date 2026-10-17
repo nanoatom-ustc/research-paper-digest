@@ -7,6 +7,7 @@ from datetime import datetime
 from aps_fetcher import APSFetcher
 from arxiv_fetcher import ArxivFetcher
 from config import Config
+from crossref_fetcher import CrossrefFetchError
 from email_sender import EmailSender
 from nature_fetcher import NatureFetcher
 from optica_fetcher import OpticaFetcher
@@ -45,6 +46,10 @@ class PaperDailyDigest:
                     days_back=days_back, max_results=Config.MAX_RESULTS
                 )
                 papers.extend(source_papers)
+            except CrossrefFetchError as exc:
+                papers.extend(exc.papers)
+                self.failed_sources.append(fetcher.source_name)
+                logger.error("Data source incomplete: %s", exc)
             except Exception:
                 self.failed_sources.append(fetcher.source_name)
                 logger.exception("Data source failed: %s", fetcher.source_name)

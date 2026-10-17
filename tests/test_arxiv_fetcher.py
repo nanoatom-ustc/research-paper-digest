@@ -55,7 +55,7 @@ class ArxivRetryTests(unittest.TestCase):
         self.assertEqual(_ArxivSession().get('https://example.test').status_code, 200)
         self.assertEqual(self.waits, [75])
         self.assertEqual(get.call_count, 2)
-        self.assertEqual(get.call_args.kwargs['timeout'], (10, 30))
+        self.assertEqual(get.call_args.kwargs['timeout'], (10, 90))
 
     @patch('requests.Session.get')
     def test_429_exhaustion_bounded_exponential_backoff(self, get):
@@ -124,6 +124,8 @@ class ArxivRetryTests(unittest.TestCase):
         self.assertIn('cat:quant-ph', query)
         self.assertIn('submittedDate:', query)
         self.assertIn('atom array', query)
+        self.assertEqual(get.call_args.kwargs['timeout'], (10, 90))
+        self.assertLessEqual(int(parse_qs(urlsplit(get.call_args.args[0]).query)['max_results'][0]), 50)
         self.assertEqual(self.waits, [30])
 
     @patch('requests.Session.get')
