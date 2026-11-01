@@ -6,12 +6,29 @@ on:
     - cron: '0 1 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+# Serialize scheduled/manual runs, including runs from different refs.
+concurrency:
+  group: paper-digest-delivery
+  cancel-in-progress: false
+
 jobs:
   send-digest:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Checkout durable delivery history
+        uses: actions/checkout@v4
+        with:
+          ref: digest-history
+          path: .digest-history
+
+      - name: Validate delivery history
+        run: test -f .digest-history/sent_papers.json
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -23,6 +40,7 @@ jobs:
 
       - name: Run paper digest
         env:
+          SENT_HISTORY_PATH: .digest-history/sent_papers.json
           EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
@@ -39,3 +57,17 @@ jobs:
           OPTICA_JOURNALS: ${{ vars.OPTICA_JOURNALS || 'Optica' }}
           CROSSREF_MAILTO: ${{ vars.CROSSREF_MAILTO || '' }}
         run: python main.py
+
+      # An incomplete-source run exits nonzero after sending its warning digest.
+      # Persist accepted papers even then, so rerunning does not repeat them.
+      - name: Save delivery history
+        if: ${{ always() && !cancelled() }}
+        working-directory: .digest-history
+        run: |
+          git add sent_papers.json
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Record successfully delivered papers"
+            git push origin HEAD:digest-history
+          fi

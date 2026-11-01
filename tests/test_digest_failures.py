@@ -1,3 +1,5 @@
+import os
+import tempfile
 import unittest
 from unittest.mock import Mock, patch
 
@@ -17,6 +19,13 @@ def source(name, papers=None, error=None):
 
 
 class DigestFailureTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        env = patch.dict(os.environ, {"SENT_HISTORY_PATH": temporary.name + "/sent.json"})
+        env.start()
+        self.addCleanup(env.stop)
+
     def make_digest(self, fetchers):
         with patch("main.Config.SEARCH_SOURCES", []):
             digest = PaperDailyDigest()

@@ -13,6 +13,7 @@ from nature_fetcher import NatureFetcher
 from optica_fetcher import OpticaFetcher
 from paper_utils import generate_summary
 from science_fetcher import ScienceFetcher
+from sent_history import SentHistory
 
 
 logging.basicConfig(
@@ -54,24 +55,18 @@ class PaperDailyDigest:
                 self.failed_sources.append(fetcher.source_name)
                 logger.exception("Data source failed: %s", fetcher.source_name)
 
-        # A DOI may appear in more than one source. Preserve the first result and
-        # apply MAX_RESULTS to the combined digest, matching the old global limit.
-        unique_papers = {}
-        for paper in papers:
-            key = (paper.get("doi") or paper.get("id") or paper.get("article_url", "")).lower()
-            if key and key not in unique_papers:
-                unique_papers[key] = paper
-
-        return sorted(
-            unique_papers.values(), key=lambda paper: paper.get("published", ""), reverse=True
-        )[: Config.MAX_RESULTS]
+        # History filtering must happen before the global result limit.
+        return sorted(papers, key=lambda paper: paper.get("published", ""), reverse=True)
 
     def run(self, test_mode=False):
         logger.info("=" * 60)
         logger.info("Starting paper digest task - %s", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         try:
             days_back = 0 if test_mode else Config.FETCH_DAYS
-            papers = self.fetch_papers(days_back)
+            history = SentHistory(os.getenv("SENT_HISTORY_PATH", ".state/sent_papers.json"))
+            candidates = self.fetch_papers(days_back)
+            papers = history.select(candidates, Config.MAX_RESULTS)
+            logger.info("Selected %s new papers from %s candidates", len(papers), len(candidates))
             summaries = [generate_summary(paper) for paper in papers]
 
             if self.failed_sources:
@@ -86,6 +81,9 @@ class PaperDailyDigest:
             if not self.email_sender.send_digest(papers, summaries, **options):
                 logger.error("Email sending failed")
                 return False
+            # Even an incomplete-source warning email may contain papers.
+            # Record those accepted by SMTP before reporting the source failure.
+            history.record_sent()
             if self.failed_sources:
                 logger.error("Warning digest sent, but task failed because source data is incomplete")
                 return False

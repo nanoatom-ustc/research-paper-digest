@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 .env
 test-results.txt
+
+.state/
+.digest-history/
