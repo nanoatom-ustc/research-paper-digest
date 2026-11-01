@@ -1,9 +1,0 @@
-arxiv-daily-digest/
-├── main.py              # 主程序
-├── config.py           # 配置文件
-├── arxiv_fetcher.py    # Arxiv相关功能
-├── email_sender.py     # 邮件发送功能
-├── requirements.txt    # 依赖包
-├── .env               # 环境变量（不要提交到git）
-├── logs/              # 日志目录
-└── README.md          # 说明文档
